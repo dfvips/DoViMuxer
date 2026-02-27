@@ -1,6 +1,19 @@
 name: Build Latest
 
 on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+    paths-ignore:
+      - '**/*.md'
+      - '**/.gitignore'
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/.gitignore'
   workflow_dispatch:
     inputs:
       doRelease:
