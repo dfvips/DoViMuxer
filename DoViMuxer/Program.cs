@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -233,16 +233,16 @@ namespace DoViMuxer
             var startTime = DateTime.Now;
             try
             {
-
-            if (vTrack.GlobalHasCover && cover == null)
-            {
-                //抽取封面
+                if (vTrack.GlobalHasCover && cover == null)
+                {
+                    //抽取封面
                     await Utils.RunCommandAsync(config.FFmpeg, $"-nostdin -loglevel error -i \"{vTrack.FilePath}\" -map 0:v:1 -vframes 1 -y -f image2 -pix_fmt rgb24 \"{now}.png\"", option.Debug);
-                Utils.LogColor("\r\nExtract cover image...");
-                cover = $"{now}.png";
-                tmpFiles.Add(cover);
+                    Utils.LogColor("\r\nExtract cover image...");
+                    cover = $"{now}.png";
+                    tmpFiles.Add(cover);
+                }
 
-            Utils.LogColor("\r\nExtract video track...");
+                Utils.LogColor("\r\nExtract video track...");
             var videoExt = vTrack.H264 ? "h264" : "hevc";
             await Utils.RunCommandAsync(config.FFmpeg, $"-nostdin -loglevel warning -i \"{vTrack.FilePath}\" -c copy -f {videoExt} \"{now}.{videoExt}\"", option.Debug);
             tmpFiles.Add($"{now}.{videoExt}");
