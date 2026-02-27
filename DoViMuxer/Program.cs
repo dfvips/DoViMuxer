@@ -116,6 +116,10 @@ namespace DoViMuxer
 
             if (option.Maps != null && option.Maps.Count > 0)
             {
+                if (dic.ContainsKey(0))
+                {
+                    selectedTracks.AddRange(dic[0]);
+                }
                 foreach (var item in option.Maps)
                 {
                     foreach (var t in FilterByUserMap(item, dic))
@@ -123,6 +127,7 @@ namespace DoViMuxer
                         selectedTracks.Add(new Mediainfo(t));
                     }
                 }
+                selectedTracks = selectedTracks.Distinct().ToList();
             }
             else
             {
