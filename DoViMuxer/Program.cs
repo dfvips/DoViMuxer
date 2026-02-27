@@ -116,23 +116,33 @@ namespace DoViMuxer
 
             if (option.Maps != null && option.Maps.Count > 0)
             {
-                if (dic.ContainsKey(0))
-                {
-                    selectedTracks.AddRange(dic[0]);
-                }
+                var mappedInputs = new HashSet<int>();
                 foreach (var item in option.Maps)
                 {
+                    var arr = item.Split(':');
+                    if (int.TryParse(arr[0], out int inputIndex))
+                    {
+                        mappedInputs.Add(inputIndex);
+                    }
                     foreach (var t in FilterByUserMap(item, dic))
                     {
                         selectedTracks.Add(new Mediainfo(t));
                     }
                 }
-                selectedTracks = selectedTracks.Distinct().ToList();
+                foreach (var kv in dic)
+                {
+                    if (!mappedInputs.Contains(kv.Key))
+                    {
+                        foreach (var t in kv.Value)
+                        {
+                            selectedTracks.Add(new Mediainfo(t));
+                        }
+                    }
+                }
             }
             else
             {
-                //默认全部
-                selectedTracks.AddRange(allMediainfos);
+                selectedTracks.AddRange(allMediainfos.Select(m => new Mediainfo(m)));
             }
 
             //设置每个类型自己的序号
