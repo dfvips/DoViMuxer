@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -223,9 +223,10 @@ namespace DoViMuxer
         public static async Task<List<Chapter>> ReadChapterAsync(string binary, string file, bool showDetail = false)
         {
             var list = new List<Chapter>();
+            string? outFile = null;
             try
             {
-                var outFile = Path.GetTempFileName() + ".txt";
+                outFile = Path.GetTempFileName() + ".txt";
                 var cmd = $"-loglevel quiet -i \"{file}\" -f ffmetadata -y \"{outFile}\"";
 
                 if (showDetail) Utils.LogGray($"{binary} {cmd}");
@@ -269,6 +270,10 @@ namespace DoViMuxer
             catch (Exception ex)
             {
                 Utils.LogWarn("read chapter: " + ex.Message);
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(outFile)) Utils.SafeDelete(outFile);
             }
             return list;
         }

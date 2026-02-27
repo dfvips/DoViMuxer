@@ -51,6 +51,7 @@ namespace DoViMuxer
             {
                 throw new FileNotFoundException("Input file not found!");
             }
+            var sourcePaths = input.Select(Path.GetFullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             Utils.LogColor("Reading inputs...");
 
@@ -230,12 +231,12 @@ namespace DoViMuxer
 #endif
 
             var startTime = DateTime.Now;
+            try
 
             if (vTrack.GlobalHasCover && cover == null)
             {
                 //抽取封面
                 Utils.LogColor("\r\nExtract cover image...");
-                await Utils.RunCommandAsync(config.FFmpeg, $"-nostdin -loglevel error -i \"{vTrack.FilePath}\" -map 0:v:1 -vframes 1 -y -f image2 -pix_fmt rgb24 \"{now}.png\"", option.Debug);
                 cover = $"{now}.png";
                 tmpFiles.Add(cover);
             }
@@ -287,6 +288,15 @@ namespace DoViMuxer
             }
 
             tmpFiles.Add(tmpVideoName);
+            if (vTrack.DolbyVison)
+            {
+                var esPath = Path.GetFullPath($"{now}.{videoExt}");
+                if (!sourcePaths.Contains(esPath))
+                {
+                    Utils.SafeDelete(esPath);
+                }
+                tmpFiles.Remove($"{now}.{videoExt}");
+            }
 
             if (selectedAudios.Any() || selectedSubtitle.Any())
                 Utils.LogColor("\r\nAdd audio / subtitle to mp4...");
@@ -337,19 +347,27 @@ namespace DoViMuxer
             }
 
             await Utils.RunCommandAsync(config.MP4Box, $"-tmp \"{Environment.CurrentDirectory}\" -inter 500 -for-test {chapArg} -noprog -add \"{tmpVideoName}#1:name=:group=1{flagArg}\" {sb} -brand mp42isom -ab iso6 -ab msdh -ab dby1 -itags tool=\"{tools}\":title=\"{title}\":comment=\"{comment}\":copyright=\"{copyright}\":cover=\"{cover}\" -new \"{output}\"", option.Debug);
-
-            Utils.LogColor("\r\nClean temp files...");
-            foreach (var item in tmpFiles)
-            {
-                if (File.Exists(item)) File.Delete(item);
-            }
-
+            
             var endTime = DateTime.Now;
             var dur = endTime - startTime;
             Console.WriteLine();
             Console.WriteLine($"StartTime: {startTime}");
             Console.WriteLine($"  EndTime: {endTime}");
             Console.WriteLine($"     Cost: {dur}");
+            }
+            finally
+            {
+                if (tmpFiles.Any())
+                {
+                    Utils.LogColor("\r\nClean temp files...");
+                    foreach (var item in tmpFiles)
+                    {
+                        var full = Path.GetFullPath(item);
+                        if (!sourcePaths.Contains(full)) Utils.SafeDelete(item);
+                    }
+                }
+                Utils.SafeDelete($"{now}.txt");
+            }
         }
 
         private static void SetTypeIndex(List<Mediainfo> list)
