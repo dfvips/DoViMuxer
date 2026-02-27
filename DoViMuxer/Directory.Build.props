@@ -17,7 +17,11 @@
     <PublishAot>false</PublishAot>
   </PropertyGroup>
 
-	<ItemGroup Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' != 'win-arm64' and '$(RuntimeIdentifier)' != 'linux-arm64'">
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-musl-arm64'">
+    <StripSymbols>false</StripSymbols>
+  </PropertyGroup>
+
+	<ItemGroup Condition="'$(PublishAot)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-musl-x64')">
 		<PackageReference Include="PublishAotCompressed" Version="0.0.4" />
 	</ItemGroup>
 	
