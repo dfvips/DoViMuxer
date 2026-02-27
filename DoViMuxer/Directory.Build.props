@@ -18,9 +18,7 @@
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-bionic-x64' or '$(RuntimeIdentifier)' == 'linux-bionic-arm64'">
-    <PublishAot>false</PublishAot>
-  </PropertyGroup>
+  <!-- Unify AOT across platforms; bionic will attempt AOT via runtime pack in CI -->
 
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-musl-arm64'">
     <StripSymbols>false</StripSymbols>
