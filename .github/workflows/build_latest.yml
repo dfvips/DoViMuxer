@@ -127,12 +127,13 @@ jobs:
           path: DoViMuxer_${{ needs.set-date.outputs.tag }}_win-arm64_${{ needs.set-date.outputs.date }}.zip
 
   build-linux-x64-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: set-date
 
     steps:
       # https://learn.microsoft.com/zh-cn/dotnet/core/deploying/native-aot/cross-compile
       - run: |
+          sudo rm -f /etc/apt/sources.list.d/kitware.list || true
           sudo dpkg --add-architecture arm64
           sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list <<EOF
           deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted
@@ -252,7 +253,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
-      - run: apt-get update
+      - run: rm -f /etc/apt/sources.list.d/kitware.list || true && apt-get update
       - run: apt-get install -y build-essential clang binutils-aarch64-linux-gnu
       - run: dotnet publish DoViMuxer -r linux-musl-arm64 -c Release -o artifact -p:CppCompilerAndLinker=clang -p:SysRoot=/crossrootfs/arm64 -p:InvariantGlobalization=true
 
